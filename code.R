@@ -190,7 +190,7 @@ grafico_Empregos_Linguagem<-linguagem %>%
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
-  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Empregos diretos gerados por linguagem em 2015")
 
@@ -252,7 +252,7 @@ grafico_Empregos_Natureza<-natureza %>%
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
-  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Empregos diretos gerados por natureza jurídica em 2015")
 
@@ -311,7 +311,7 @@ grafico_Empregos_Cor<-cor %>%
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
-  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Empregos diretos gerados por cor em 2015")
 
@@ -375,7 +375,7 @@ grafico_Empregos_Sexo<-sexo %>%
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
-  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Empregos diretos gerados por gênero jurídica em 2015")
 
@@ -441,7 +441,7 @@ grafico_Empregos_RA_Proponente<-cidades %>%
         legend.position = "none")+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
-  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
   ggtitle("Empregos diretos gerados por Região Administrativa em 2015")+
   coord_flip()
@@ -524,7 +524,7 @@ grafico_Empregos_Escolaridade<-escolaridade %>%
   theme(legend.position = "none",legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
-  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
   ggtitle("Empregos diretos gerados por escolaridade em 2015")+
   coord_flip()
