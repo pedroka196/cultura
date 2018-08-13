@@ -558,3 +558,5 @@ save.image(file="dados_finais_salvos", compress = T)
 rm(list = rm())
 
 load("dados_finais_salvos")
+
+grafico_Residencia
