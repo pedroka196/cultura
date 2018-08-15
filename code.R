@@ -175,9 +175,15 @@ grafico_Valores_Linguagem<-linguagem %>%
 grafico_Contagem_Linguagem<-linguagem %>%
   ggplot(aes(x=Linguagem,y=Num,fill=Linguagem,group=Linguagem))+
   geom_col() +
+<<<<<<< HEAD
   geom_text(stat="identity", aes(label=sprintf("%s", format(Num, big.mark = ".", decimal.mark = ",")),
                                  y=Num),position=position_dodge(width=0.1),vjust=-0.25,size=3) +
   
+=======
+  geom_text(stat="identity", aes(label=sprintf("%s projetos", format(Num, big.mark = ".", decimal.mark = ",")),
+                                 y=Num),position=position_dodge(width=0.1),vjust=-0.25,size=3) +
+  ggthemes::theme_fivethirtyeight()+
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   ggtitle("Projetos pagos por linguagem em 2015")
 
@@ -209,6 +215,7 @@ grafico_Publico_Linguagem<-linguagem %>%
   ggtitle("Público estimado por linguagem em 2015")
 
 #salva apenas estes gráficos
+
 
 #gráficos para visualização
 grafico_Valores_Linguagem
@@ -248,11 +255,19 @@ grafico_Empregos_Natureza<-natureza %>%
   ggplot(aes(x=Natureza_Jurídica,y=Empregos,fill=Natureza_Jurídica,group=Natureza_Jurídica))+
   #Gráfico de colunas
   geom_col() +
+<<<<<<< HEAD
   
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
   geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
+=======
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Empregos diretos gerados por natureza jurídica em 2015")
 
@@ -261,6 +276,7 @@ grafico_Publico_Natureza<-natureza %>%
   ggplot(aes(x=Natureza_Jurídica,y=Publico,fill=Natureza_Jurídica,group=Natureza_Jurídica))+
   #Gráfico de colunas
   geom_col() +
+<<<<<<< HEAD
   
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
@@ -268,6 +284,15 @@ grafico_Publico_Natureza<-natureza %>%
   geom_text(stat="identity", aes(label=sprintf("%s", format(Publico,big.mark = ".", decimal.mark = ",")),
                                  y=Publico+PublicoSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Público estimado por natureza em 2015")
+=======
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s pessoas", format(Publico,big.mark = ".", decimal.mark = ",")),
+                                 y=Publico+PublicoSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
+  ggtitle("Publico estimado por natureza em 2015")
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
 
 
 grafico_Contagem_Natureza
@@ -307,11 +332,19 @@ grafico_Empregos_Cor<-cor %>%
   ggplot(aes(x=Cor,y=Empregos,fill=Cor,group=Cor))+
   #Gráfico de colunas
   geom_col() +
+<<<<<<< HEAD
   
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
   geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
+=======
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Empregos diretos gerados por cor em 2015")
 
@@ -321,6 +354,7 @@ grafico_Publico_Cor<-cor %>%
   ggplot(aes(x=Cor,y=Publico,fill=Cor,group=Cor))+
   #Gráfico de colunas
   geom_col() +
+<<<<<<< HEAD
   
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
@@ -328,6 +362,15 @@ grafico_Publico_Cor<-cor %>%
   geom_text(stat="identity", aes(label=sprintf("%s", format(Publico,big.mark = ".", decimal.mark = ",")),
                                  y=Publico+PublicoSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Público estimado por cor ou raça em 2015")
+=======
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s pessoas", format(Publico,big.mark = ".", decimal.mark = ",")),
+                                 y=Publico+PublicoSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
+  ggtitle("Publico estimado por cor em 2015")
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
 
 
 
@@ -367,6 +410,7 @@ grafico_Valores_Sexo<-sexo %>%
   ggtitle("Valores pagos em reais por gênero em 2015",ylab("Em reais"))
 
 #Gráficos para empregos
+<<<<<<< HEAD
 grafico_Empregos_Sexo<-sexo %>%
   ggplot(aes(x=Sexo,y=Empregos,fill=Sexo,group=Sexo))+
   #Gráfico de colunas
@@ -376,6 +420,17 @@ grafico_Empregos_Sexo<-sexo %>%
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
   #### 
   geom_text(stat="identity", aes(label=sprintf("%s", format(Empregos,big.mark = ".", decimal.mark = ",")),
+=======
+grafico_Empregos_RA_Proponente<-sexo %>%
+  ggplot(aes(x=Sexo,y=Empregos,fill=Sexo,group=Sexo))+
+  #Gráfico de colunas
+  geom_col() +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
                                  y=Empregos+EmpregosSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Empregos diretos gerados por gênero jurídica em 2015")
 
@@ -384,6 +439,7 @@ grafico_Publico_Sexo<-sexo %>%
   ggplot(aes(x=Sexo,y=Publico,fill=Sexo,group=Sexo))+
   #Gráfico de colunas
   geom_col() +
+<<<<<<< HEAD
   
   theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
@@ -391,11 +447,21 @@ grafico_Publico_Sexo<-sexo %>%
   geom_text(stat="identity", aes(label=sprintf("%s", format(Publico,big.mark = ".", decimal.mark = ",")),
                                  y=Publico+PublicoSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
   ggtitle("Público estimado por gênero em 2015")
+=======
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s pessoas", format(Publico,big.mark = ".", decimal.mark = ",")),
+                                 y=Publico+PublicoSD),position=position_dodge(width=0.1),vjust=-0.5,size=3) +
+  ggtitle("Publico estimado por gênero em 2015")
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
 
 grafico_Contagem_Sexo
 grafico_Valores_Sexo
 grafico_Publico_Sexo
 grafico_Empregos_Sexo
+<<<<<<< HEAD
 
 
 # Gráficos Cidade -----------------------------------------------------------
@@ -560,3 +626,157 @@ rm(list = rm())
 load("dados_finais_salvos")
 
 grafico_Residencia
+=======
+
+
+# Gráficos Cidade -----------------------------------------------------------
+
+grafico_Contagem_RA_Proponente<-cidades %>%
+  #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+  filter(Num>1) %>%
+  ggplot(aes(x=RA_Proponente,y=Num,fill=RA_Proponente,group=RA_Proponente))+
+  geom_col() +
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Num, big.mark = ".", decimal.mark = ",")),
+                                 y=Num),position=position_dodge(height=0.1),hjust=-0.15,size=3) +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  ggtitle("Projetos pagos por Região Administrativa em 2015")+
+  coord_flip()
+
+
+
+grafico_Valores_RA_Proponente<-cidades %>%
+  #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+  filter(Num>1) %>%
+  ggplot(aes(x=RA_Proponente,y=Valor,fill=RA_Proponente,group=RA_Proponente))+
+  #Gráfico de colunas
+  geom_col() +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Valor-ValorSD,ymax=Valor+ValorSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",")),
+                                 y=Valor+ValorSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
+  ggtitle("Valores pagos em reais por gênero em 2015",ylab("Em reais"))+
+  coord_flip()
+
+#Gráficos para empregos
+grafico_Empregos_RA_Proponente<-cidades %>%
+  #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+  filter(Num>1) %>%
+  ggplot(aes(x=RA_Proponente,y=Empregos,fill=RA_Proponente,group=RA_Proponente))+
+  #Gráfico de colunas
+  geom_col() +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+                                 y=Empregos+EmpregosSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
+  ggtitle("Empregos diretos gerados por gênero em 2015")+
+  coord_flip()
+
+# Gráfico de público estimado
+grafico_Publico_RA_Proponente<-cidades %>%
+  #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+  filter(Num>2) %>%
+  ggplot(aes(x=RA_Proponente,y=Publico,fill=RA_Proponente,group=RA_Proponente))+
+  #Gráfico de colunas
+  geom_col() +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+  geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
+  #### 
+  geom_text(stat="identity", aes(label=sprintf("%s pessoas", format(Publico,big.mark = ".", decimal.mark = ",")),
+                                 y=Publico+PublicoSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
+  ggtitle("Publico estimado por gênero em 2015")+
+  coord_flip()
+
+grafico_Contagem_RA_Proponente
+grafico_Valores_RA_Proponente
+grafico_Publico_RA_Proponente
+grafico_Empregos_RA_Proponente
+
+# Gráficos Cidades Atingidas -----------------------------------------------------------
+
+grafico_Contagem_RA_Atingidas<-cidades_atingidas %>%
+  #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+  filter(Num>2) %>%
+  arrange(Num) %>%
+  ggplot(aes(x=reorder(Cidades, Num),y=Num,fill=Cidades,group=Cidades))+
+  geom_col() +
+  geom_text(stat="identity", aes(label=sprintf("%s", format(Num, big.mark = ".", decimal.mark = ",")),
+                                 y=Num),position=position_dodge(width =0.1),hjust=-0.15,size=3) +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.text.x = element_blank(),legend.text = element_text(size=7), legend.title = element_blank(), legend.position = "none")+
+  ggtitle("Número de vezes que uma RA foi alvo por um projeto")+
+  coord_flip()
+
+  grafico_Contagem_RA_Atingidas
+  
+  
+# Gráfico de escolaridade ----------------------------------------
+  ## Neste gráficos haviam dados faltando, e estes serão destacados no gráfico
+  grafico_Contagem_Escolaridade<-escolaridade %>%
+    ggplot(aes(x=Escolaridade,y=Num,fill=Escolaridade,group=Escolaridade))+
+    geom_col() +
+    geom_text(stat="identity", aes(label=sprintf("%s projetos", format(Num, big.mark = ".", decimal.mark = ",")),
+                                   y=Num),position=position_dodge(width=0.1),hjust=-0.25,size=3) +
+    ggthemes::theme_fivethirtyeight()+
+    theme(axis.text.y = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+    coord_flip() +
+    ggtitle("Projetos pagos por escolaridade em 2015")
+  
+  grafico_Valores_Escolaridade<-escolaridade %>%
+    #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+    filter(Num>1) %>%
+    ggplot(aes(x=Escolaridade,y=Valor,fill=Escolaridade,group=Escolaridade))+
+    #Gráfico de colunas
+    geom_col() +
+    ggthemes::theme_fivethirtyeight()+
+    theme(axis.text.y = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+    geom_errorbar(mapping=aes(ymin=Valor-ValorSD,ymax=Valor+ValorSD),width=0) +
+    #### 
+    geom_text(stat="identity", aes(label=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",")),
+                                   y=Valor+ValorSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
+    ggtitle("Valores pagos em reais por escolaridade em 2015",ylab("Em reais"))+
+    coord_flip()
+  
+  #Gráficos para empregos
+  grafico_Empregos_Escolaridade<-escolaridade %>%
+    #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+    filter(Num>1) %>%
+    ggplot(aes(x=Escolaridade,y=Empregos,fill=Escolaridade,group=Escolaridade))+
+    #Gráfico de colunas
+    geom_col() +
+    ggthemes::theme_fivethirtyeight()+
+    theme(axis.text.y = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+    geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,ymax=Empregos+EmpregosSD),width=0) +
+    #### 
+    geom_text(stat="identity", aes(label=sprintf("%s empregos", format(Empregos,big.mark = ".", decimal.mark = ",")),
+                                   y=Empregos+EmpregosSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
+    ggtitle("Empregos diretos gerados por escolaridade em 2015")+
+    coord_flip()
+  
+  # Gráfico de público estimado
+  grafico_Publico_Escolaridade<-escolaridade %>%
+    #optei por colocar apenas RAs com mais de um projeto executado, para deixar o gráfico mais limpo
+    filter(Num>2) %>%
+    ggplot(aes(x=Escolaridade,y=Publico,fill=Escolaridade,group=Escolaridade))+
+    #Gráfico de colunas
+    geom_col() +
+    ggthemes::theme_fivethirtyeight()+
+    theme(axis.text.y = element_blank(),legend.text = element_text(size=7), legend.title = element_blank())+
+    geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,ymax=Publico+PublicoSD),width=0) +
+    #### 
+    geom_text(stat="identity", aes(label=sprintf("%s pessoas", format(Publico,big.mark = ".", decimal.mark = ",")),
+                                   y=Publico+PublicoSD),position=position_dodge(width=0.1),hjust=-0.15,size=3) +
+    ggtitle("Público estimado por escolaridade em 2015")+
+    coord_flip()
+  
+  grafico_Contagem_Escolaridade
+  grafico_Valores_Escolaridade
+  grafico_Publico_Escolaridade
+  grafico_Empregos_Escolaridade
+  
+>>>>>>> ada2f00fe593dc28e1a24ae549ccfae16a3c395a
