@@ -2,6 +2,7 @@ library(ggplot2)
 library(ggthemes)
 library(ggthemr)
 library(ggrepel)
+library(scales)
 
 # Gráficos Linguagem -----------------------------------------------------------
 tamanho=2
@@ -20,7 +21,7 @@ grafico_Valores_Linguagem<-linguagem %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Valor-ValorSD,
                             ymax=Valor+ValorSD),
-                width=0) +
+                width=0.2) +
   #### Optei pelo ggrepel porque ele coloca labels em cada plot, ficando mais fácil de visualizar
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("R$ %s", 
@@ -69,7 +70,7 @@ grafico_Empregos_Linguagem<-linguagem %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,
                             ymax=Empregos+EmpregosSD),
-                width=0) +
+                width=0.2) +
   # ggrepel::geom_label_repel(stat="identity",
   #                           aes(label=sprintf("%s", 
   #                                             format(Empregos,
@@ -97,7 +98,7 @@ grafico_Publico_Linguagem<-linguagem %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,
                             ymax=Publico+PublicoSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s", 
@@ -114,8 +115,31 @@ grafico_Publico_Linguagem<-linguagem %>%
 
 
 # Gráficos Natureza -----------------------------------------------------------
+#Gráficos contagem por natureza jurídica_ Gráfico circular
+grafico_Contagem_Natureza_Pie<-natureza %>%
+  mutate(pos = cumsum(Num)-Num/(length(Num))) %>%
+  ggplot(aes(x="",
+             y=Num,
+             fill=Natureza_Jurídica,
+             group=Natureza_Jurídica))+
+  geom_col(width = 1, position = "stack") +
+  coord_polar("y")+
+  geom_text(aes(label=sprintf("%s", 
+                              format(percent(Num/sum(Num)),
+                                     big.mark = ".", 
+                                     decimal.mark = ","))),
+            position = position_stack(vjust=0.5),
+            size=3) +
+  theme(axis.text.x = element_blank(),
+        legend.title = element_blank(), 
+        axis.title=element_blank(),
+        line=element_blank())+
+  ggtitle("Projetos pagos por natureza jurídica em 2015")+
+  theme(legend.title = element_blank(), 
+        axis.title=element_blank())
 
-#Gráficos contagem por natureza jurídica
+## Gráfico barras
+
 grafico_Contagem_Natureza<-natureza %>%
   ggplot(aes(x=Natureza_Jurídica,
              y=Num,
@@ -152,7 +176,7 @@ grafico_Valores_Natureza<-natureza %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Valor-ValorSD,
                             ymax=Valor+ValorSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity",
   #                           aes(label=sprintf("R$ %s", 
@@ -180,7 +204,7 @@ grafico_Empregos_Natureza<-natureza %>%
         legend.title = element_blank(), axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,
                             ymax=Empregos+EmpregosSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s", 
@@ -194,7 +218,30 @@ grafico_Empregos_Natureza<-natureza %>%
   #                                              units = "pt")) +
   ggtitle("Empregos diretos gerados por natureza jurídica em 2015")
 
-#Gráfico de público estiamdo
+#Gráficos para empregos pie
+grafico_Empregos_Natureza_Pie<-natureza %>%
+  ggplot(aes(x="",
+             y=Empregos,
+             fill=Natureza_Jurídica,
+             group=Natureza_Jurídica))+
+  #Gráfico de colunas
+  geom_col(width = 1) +
+  theme(axis.text.x = element_blank(),
+        legend.title = element_blank(), 
+        axis.title=element_blank(),
+        line= element_blank())+
+  geom_text(aes(label=sprintf("%s", 
+                              format(Empregos,
+                                     big.mark = ".", 
+                                     decimal.mark = ","))),
+            position = position_stack(vjust=0.5),
+            size=3)+
+  coord_polar("y") +
+ggtitle("Empregos diretos gerados por natureza jurídica em 2015")
+
+
+
+#Gráfico de público estimado
 grafico_Publico_Natureza<-natureza %>%
   ggplot(aes(x=Natureza_Jurídica,
              y=Publico,
@@ -208,7 +255,7 @@ grafico_Publico_Natureza<-natureza %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,
                             ymax=Publico+PublicoSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity",
   #                           aes(label=sprintf("%s",
@@ -221,6 +268,27 @@ grafico_Publico_Natureza<-natureza %>%
   #                                              units = "pt")) +
   ggtitle("Público estimado por natureza em 2015")
 
+
+#Gráfico de público estimado pie
+grafico_Publico_Natureza_Pie <-natureza %>%
+  ggplot(aes(x="",
+             y=Publico,
+             fill=Natureza_Jurídica,
+             group=Natureza_Jurídica))+
+  #Gráfico de colunas
+  geom_col(width = 1) +
+  theme(axis.text.x = element_blank(),
+        legend.title = element_blank(), 
+        axis.title=element_blank(),
+        line= element_blank())+
+  geom_text(aes(label=sprintf("%s", 
+                              format(Publico,
+                                     big.mark = ".", 
+                                     decimal.mark = ","))),
+            position = position_stack(vjust=0.5),
+            size=3)+
+  ggtitle("Público estimado por natureza em 2015")+
+  coord_polar("y")
 
 # Gráficos Cor ou Raça -----------------------------------------------------------
 
@@ -263,7 +331,7 @@ grafico_Valores_Cor<-cor %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Valor-ValorSD,
                             ymax=Valor+ValorSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity",
   #                           aes(label=sprintf("R$ %s",
@@ -291,7 +359,7 @@ grafico_Empregos_Cor<-cor %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,
                             ymax=Empregos+EmpregosSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s", 
@@ -321,7 +389,7 @@ grafico_Publico_Cor<-cor %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,
                             ymax=Publico+PublicoSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity",
   #                           aes(label=sprintf("%s",
@@ -365,6 +433,28 @@ grafico_Contagem_Sexo<-sexo %>%
         axis.title=element_blank())+
   ggtitle("Projetos pagos por gênero em 2015")
 
+# Grafico Contagem sexo Pizza
+grafico_Contagem_Sexo_Pie <-sexo %>%
+  ggplot(aes(x="",
+             y=Num,
+             fill=Sexo,
+             group=Sexo))+
+  #Gráfico de colunas
+  geom_col(width = 1) +
+  theme(axis.text.x = element_blank(),
+        legend.title = element_blank(),
+        axis.title=element_blank(),
+        line = element_blank())+
+  geom_text(aes(label=sprintf("%s", 
+                              format(percent(Num/sum(Num)),
+                                     big.mark = ".", 
+                                     decimal.mark = ","))),
+            position = position_stack(vjust=0.5),
+            size=3)+
+  ggtitle("Projetos pagos por sexo em 2015")+
+  coord_polar(theta = "y")
+  
+
 
 
 grafico_Valores_Sexo<-sexo %>%
@@ -381,7 +471,7 @@ grafico_Valores_Sexo<-sexo %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Valor-ValorSD,
                             ymax=Valor+ValorSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity",
   #                           aes(label=sprintf("R$ %s",
@@ -410,7 +500,7 @@ grafico_Empregos_Sexo<-sexo %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,
                             ymax=Empregos+EmpregosSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s",
@@ -423,6 +513,28 @@ grafico_Empregos_Sexo<-sexo %>%
   #                           box.padding = unit(x = 0, 
   #                                              units = "pt")) +
   ggtitle("Empregos diretos gerados por gênero em 2015")
+
+# Grafico Contagem sexo Pizza
+grafico_Empregos_Sexo_Pie <-sexo %>%
+  ggplot(aes(x="",
+             y=Empregos,
+             fill=Sexo,
+             group=Sexo))+
+  #Gráfico de colunas
+  geom_col(width = 1) +
+  theme(axis.text.x = element_blank(),
+        legend.title = element_blank(),
+        axis.title=element_blank(),
+        line = element_blank())+
+  geom_text(aes(label=sprintf("%s", 
+                              format(Empregos,
+                                     big.mark = ".", 
+                                     decimal.mark = ","))),
+            position = position_stack(vjust=0.5),
+            size=3)+
+  ggtitle("Empregos diretos gerados por gênero em 2015")+
+  coord_polar(theta = "y")
+
 
 #Gráfico de público estiamdo
 grafico_Publico_Sexo<-sexo %>%
@@ -439,7 +551,7 @@ grafico_Publico_Sexo<-sexo %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,
                             ymax=Publico+PublicoSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s", 
@@ -453,6 +565,26 @@ grafico_Publico_Sexo<-sexo %>%
   #                                              units = "pt")) +
   ggtitle("Público estimado por gênero em 2015")
 
+# Grafico Contagem sexo Pizza
+grafico_Publico_Sexo_Pie <-sexo %>%
+  ggplot(aes(x="",
+             y=Publico,
+             fill=Sexo,
+             group=Sexo))+
+  #Gráfico de colunas
+  geom_col(width = 1) +
+  theme(axis.text.x = element_blank(),
+        legend.title = element_blank(),
+        axis.title=element_blank(),
+        line = element_blank())+
+  geom_text(aes(label=sprintf("%s", 
+                              format(Publico,
+                                     big.mark = ".", 
+                                     decimal.mark = ","))),
+            position = position_stack(vjust=0.5),
+            size=3)+
+  ggtitle("Público estimado por gênero em 2015")+
+  coord_polar(theta = "y")
 
 # Gráficos Cidade -----------------------------------------------------------
 
@@ -498,7 +630,7 @@ grafico_Valores_RA_Proponente<-cidades %>%
         legend.position = "none")+
   geom_errorbar(mapping=aes(ymin=Valor-ValorSD,
                             ymax=Valor+ValorSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("R$ %s",
@@ -530,7 +662,7 @@ grafico_Empregos_RA_Proponente<-cidades %>%
         legend.position = "none")+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,
                             ymax=Empregos+EmpregosSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s", 
@@ -561,7 +693,7 @@ grafico_Publico_RA_Proponente<-cidades %>%
         legend.position = "none")+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,
                             ymax=Publico+PublicoSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s",
@@ -646,7 +778,7 @@ grafico_Valores_Escolaridade<-escolaridade %>%
         legend.position = "none")+
   geom_errorbar(mapping=aes(ymin=Valor-ValorSD,
                             ymax=Valor+ValorSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity",
   #                           aes(label=sprintf("R$ %s",
@@ -673,12 +805,11 @@ grafico_Empregos_Escolaridade<-escolaridade %>%
   #Gráfico de colunas
   geom_col(position = position_dodge(width = 0)) +
   theme(legend.position = "none",
-        
         legend.title = element_blank(), 
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Empregos-EmpregosSD,
                             ymax=Empregos+EmpregosSD),
-                width=0) +
+                width=0.2) +
   #### 
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s",
@@ -711,7 +842,7 @@ grafico_Publico_Escolaridade<-escolaridade %>%
         axis.title=element_blank())+
   geom_errorbar(mapping=aes(ymin=Publico-PublicoSD,
                             ymax=Publico+PublicoSD),
-                width=0) +
+                width=0.2) +
   # ggrepel::geom_label_repel(stat="identity", 
   #                           aes(label=sprintf("%s", format(Publico,
   #                                                          big.mark = ".",
@@ -783,6 +914,193 @@ grafico_Valores_RA_Atingida<-cidades_atingidas %>%
   coord_flip()
 
 
+##### Modalidades ----------------------
+grafico_Contagem_Modalidades <- modalidades %>%
+  ggplot(aes(x = gsub('[ ]', '\n', Modalidade),
+             y=Num,
+             fill=Modalidade,
+             group=Modalidade))+
+  geom_col(position = position_dodge(width = 0)) +
+  # ggrepel::geom_text_repel(stat="identity",
+  #                          aes(label=Num,
+  #                                y=Num),
+  #                          size=tamanho,
+  #                          show.legend = F,
+  #                          box.padding = unit(x = 0, units = "pt"),
+  #                          direction = "y",
+  #                          nudge_y = 2) +
+  theme(#axis.text.x = element_blank(),
+        legend.title = element_blank(), 
+        axis.title = element_blank(),
+        #legend.position = "buttom",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())+
+  ggtitle("Projetos pagos por modalidade em 2015")
+
+
+# Contagem de quem já concorreu ------------------------
+### Ja contemplado
+grafico_Contagem_Ja_Contemplado <- ja_contemplado %>%
+  ggplot(aes(x = Ja_Contemplado,
+             y = Num,
+             fill = Ja_Contemplado,
+             group = Ja_Contemplado))+
+  geom_col(position = position_dodge(width = 0)) +
+  # ggrepel::geom_text_repel(stat="identity",
+  #                          aes(label=Num,
+  #                              y=Num),
+  #                          size=tamanho,
+  #                          show.legend = F,
+  #                          box.padding = unit(x = 0, units = "pt"),
+  #                          direction = "y",
+  #                          nudge_y = 2) +
+  theme(#axis.text.x = element_blank(),
+    legend.title = element_blank(), 
+    axis.title=element_blank(),
+    legend.position = "none",
+    axis.text.x = element_text(vjust = 0.5))+
+  ggtitle("Quantidade de proponentes que já foram contemplados com \n recursos do FAC antes de 2015")+
+  theme(legend.title = element_blank(), 
+        axis.title=element_blank())
+
+
+### Projetos já concorreram ----------------------------------
+### Ja concorreram
+grafico_Contagem_Ja_Concorreu <- ja_concorreu %>%
+  ggplot(aes(x = Ja_Concorreu,
+             y = Num,
+             fill = Ja_Concorreu,
+             group = Ja_Concorreu))+
+  geom_col(position = position_dodge(width = 0)) +
+  # ggrepel::geom_text_repel(stat="identity",
+  #                          aes(label=Num,
+  #                              y=Num),
+  #                          size=tamanho,
+  #                          show.legend = F,
+  #                          box.padding = unit(x = 0, units = "pt"),
+  #                          direction = "y",
+  #                          nudge_y = 2) +
+  theme(#axis.text.x = element_blank(),
+    legend.title = element_blank(), 
+    axis.title=element_blank(),
+    legend.position = "none",
+    axis.text.x = element_text(vjust = 0.5))+
+  ggtitle("Quantidade de proponentes que já concorreram para \n recursos do FAC antes de 2015")+
+  theme(legend.title = element_blank(), 
+        axis.title=element_blank())
+
+# batimento entre linguagens e sexo e cor
+grafico_Contagem_Proj_Cor <- proj.cor %>%
+  ggplot(aes(x = Cor_ou_Raça,
+             y = Num,
+             fill = Linguagem,
+             group = Linguagem))+
+  geom_col() +
+  # ggrepel::geom_label_repel(aes(label=Num, fill=Cor_ou_Raça),
+  #                          size=tamanho,
+  #                          force = 1,
+  #                          show.legend = F,
+  #                          #box.padding = unit(x = 0, units = "pt"),
+  #                          direction = "y",
+  #                          arrow = arrow(length = unit(0.01, 'npc')), box.padding = unit(1.5, 'lines'),color="black"   ) +
+  # geom_text(aes(label=Num), 
+  #           position = position_stack(vjust = 0.5),
+  #           hjust=+0.5,
+  #           size=3)+
+  theme(#axis.text.x = element_blank(),
+    legend.title = element_blank(), 
+    axis.title=element_blank(),
+    legend.position = "bottom",
+    axis.text.x = element_text(vjust = 0.5))+
+  ggtitle("Quantidade de linguagens por cor ou raça")+
+  theme(legend.title = element_blank(), 
+        axis.title=element_blank())#+
+  coord_flip()
+  
+grafico_Contagem_Proj_Sexo <- proj.sexo %>%
+    ggplot(aes(x = Sexo,
+               y = Num,
+               fill = Linguagem,
+               group = Linguagem))+
+    geom_col() +
+    # ggrepel::geom_label_repel(aes(label=Num, fill=Cor_ou_Raça),
+    #                          size=tamanho,
+    #                          force = 1,
+    #                          show.legend = F,
+    #                          #box.padding = unit(x = 0, units = "pt"),
+    #                          direction = "y",
+    #                          arrow = arrow(length = unit(0.01, 'npc')), box.padding = unit(1.5, 'lines'),color="black"   ) +
+    # geom_text(aes(label=Num), 
+    #           position = position_stack(vjust = 0.5),
+    #           hjust=+0.5,
+    #           size=3)+
+  theme(#axis.text.x = element_blank(),
+    legend.title = element_blank(), 
+    axis.title=element_blank(),
+    legend.position = "bottom",
+    axis.text.x = element_text(vjust = 0.5))+
+    ggtitle("Quantidade de linguagens por sexo")+
+    theme(legend.title = element_blank(), 
+          axis.title=element_blank())#+
+  coord_flip()
+  
+### Pessoas contempladas antes e quantas vezes concorreram -------------
+grafico_Contagem_Contemplados <- contemplados %>%
+    ggplot(aes(x = Ja_Concorreu,
+               y = Num,
+               fill = Ja_Contemplado,
+               group = Ja_Contemplado))+
+    geom_col() +
+    # ggrepel::geom_label_repel(aes(label=Num, fill=Cor_ou_Raça),
+    #                          size=tamanho,
+    #                          force = 1,
+    #                          show.legend = F,
+    #                          #box.padding = unit(x = 0, units = "pt"),
+    #                          direction = "y",
+    #                          arrow = arrow(length = unit(0.01, 'npc')), box.padding = unit(1.5, 'lines'),color="black"   ) +
+    # geom_text(aes(label=Num), 
+    #           position = position_stack(vjust = 0.5),
+    #           hjust=+0.5,
+    #           size=3)+
+  theme(#axis.text.x = element_blank(), 
+    axis.title=element_blank(),
+    legend.position = "bottom",
+    axis.text.x = element_text(vjust = 0.5))+
+    ggtitle("Quantidade de beneficiários que já foram contemplados 
+dada a quantidade de vezes que pleitaram recursos")+
+    theme(#legend.title = element_blank(), 
+          axis.title=element_blank())+
+  labs(fill="Quantidade de vezes que \n já foi contemplados")
+
+### Valores pessoas contempladas antes e quantas vezes concorreram -------------
+  
+grafico_Valores_Contemplados <- contemplados %>%
+    ggplot(aes(x = Ja_Concorreu,
+               y = Valor,
+               fill = Ja_Contemplado,
+               group = Ja_Contemplado))+
+    geom_col() +
+    # ggrepel::geom_label_repel(aes(label=Num, fill=Cor_ou_Raça),
+    #                          size=tamanho,
+    #                          force = 1,
+    #                          show.legend = F,
+    #                          #box.padding = unit(x = 0, units = "pt"),
+    #                          direction = "y",
+    #                          arrow = arrow(length = unit(0.01, 'npc')), box.padding = unit(1.5, 'lines'),color="black"   ) +
+    # geom_text(aes(label=Num), 
+    #           position = position_stack(vjust = 0.5),
+    #           hjust=+0.5,
+    #           size=3)+
+  theme(#axis.text.x = element_blank(), 
+    axis.title=element_blank(),
+    legend.position = "bottom",
+    axis.text.x = element_text(vjust = 0.5))+
+    ggtitle("Valores recebidos em 2015 por beneficiários que já foram contemplados 
+dada a quantidade de vezes que pleitaram recursos")+
+    theme(#legend.title = element_blank(), 
+      axis.title=element_blank())+
+  labs(fill="Quantidade de vezes que \n já foi contemplados")
+
 # graficos salvos ------------------------------
 
 
@@ -793,7 +1111,12 @@ graficos_todos<-c("grafico_Valores_Linguagem","grafico_Contagem_Linguagem","graf
                   "grafico_Empregos_Sexo","grafico_Publico_Sexo","grafico_Valores_Escolaridade",
                   "grafico_Contagem_Escolaridade","grafico_Empregos_Escolaridade","grafico_Publico_Escolaridade",
                   "grafico_Valores_RA_Proponente","grafico_Contagem_RA_Proponente","grafico_Empregos_RA_Proponente",
-                  "grafico_Publico_RA_Proponente","grafico_Valores_RA_Atingida","grafico_Contagem_RA_Atingida")
+                  "grafico_Publico_RA_Proponente","grafico_Valores_RA_Atingida","grafico_Contagem_RA_Atingida",
+                  "grafico_Contagem_Natureza_Pie","grafico_Empregos_Natureza_Pie","grafico_Publico_Natureza_Pie",
+                  "grafico_Contagem_Sexo_Pie","grafico_Empregos_Sexo_Pie","grafico_Publico_Sexo_Pie",
+                  "grafico_Contagem_Modalidades","grafico_Contagem_Ja_Concorreu","grafico_Contagem_Ja_Contemplado",
+                  "grafico_Contagem_Proj_Sexo", "grafico_Contagem_Proj_Cor", "grafico_Valores_Contemplados",
+                  "grafico_Contagem_Contemplados")
 
 
 
@@ -816,7 +1139,6 @@ grafico_Publico_Cor
 grafico_Empregos_Cor
 
 
-#graficos escolaridade
 grafico_Contagem_Escolaridade
 grafico_Valores_Escolaridade
 grafico_Publico_Escolaridade
@@ -833,12 +1155,14 @@ grafico_Contagem_Sexo
 grafico_Valores_Sexo
 grafico_Publico_Sexo
 grafico_Empregos_Sexo
+grafico_Publico_Sexo_Pie
 
 #grafico natureza
 grafico_Contagem_Natureza
 grafico_Valores_Natureza
 grafico_Empregos_Natureza
 grafico_Publico_Natureza
+grafico_Publico_Natureza_Pie
 
 
 

@@ -1,0 +1,2201 @@
+---
+title: "Análise dos dados do Fundo de Apoio à Cultura 2015"
+author: "Pedro Henrique Oliveira"
+date: "07/08/2018"
+fig_width: "100%" 
+fig_height: 4 
+output:
+  pdf_document: 
+    fig_caption: yes
+  html_document:
+    df_print: paged
+header-includes:
+- \usepackage[brazilian]{babel}
+- \usepackage[utf8]{inputenc}
+---
+
+
+```{r setup, include=FALSE, echo=FALSE}
+library(xtable)
+library(forcats)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(grid)
+library(ggthemes)
+library(ggthemr)
+library(ggplot2)
+library(ggrepel)
+library(knitr)
+library(stargazer)
+options(scipen=9)
+options(xtable.floating = FALSE)
+options(xtable.timestamp = "")
+
+#Salvar os plots
+knitr::opts_chunk$set(
+  fig.path = "images/"
+)
+# Carregar objetos
+load("dados_finais_salvos.RData")
+load("graficos_dados.RData")
+options(xtable.comment = FALSE)
+
+
+tema1<-function(texto1,texto2){
+  theme(legend.text = element_text(size=texto1, lineheight = 2),
+        legend.title = element_text(size=texto2, lineheight = 2))
+}
+  
+guia<-function(colunas){
+  guides(fill=guide_legend(nrow=colunas,byrow=TRUE))
+}
+
+
+```
+```{r valores_informados, echo=FALSE}
+amostra <-FAC2015_val %>%
+  group_by(Pagamento) %>%
+        summarise(obs=n()) %>%
+  mutate(Pagamento=as.character(Pagamento))
+      
+amostra<-rbind(amostra, c("total", sum(amostra$obs)))
+amostra<-rbind(amostra, c("considerados", sum(as.integer(amostra$obs[c(1,3,4)]))))
+amostra$obs<-as.integer(amostra$obs)
+amostra$Pagamento<-as.factor(amostra$Pagamento)
+names(amostra)<-c("Pagamento","obs")
+
+margens<-c(20,20,20,20)
+names(margens)<-c("cima","baixo","direita","esquerda")
+```
+# Introdução
+
+A situação dos dados recebidos não é muito boa para ser analisada. Além da presença de diversas variáveis em branco, não há uma padronização na forma como os dados são nomeados, de modo que muitas vezes não se consegue traçar um perfil correto das informações.
+
+A base enviada pela Secretaria de Cultura do Distrito Federal contém um total de `r sprintf("%s", amostra %>% filter(Pagamento=="total") %>% select(obs))` observações. Desse total, `r sprintf("%s", amostra %>% filter(Pagamento=="não pago") %>% select(obs))` observações foram *não pagas*, enquanto que os outros consideram pagamentos em 2016 (`r sprintf("%s", amostra %>% filter(Pagamento=="pago 2016") %>% select(obs))` observações), em 2017 (`r sprintf("%s", amostra %>% filter(Pagamento=="pago 2017") %>% select(obs))` observações) e projetos com o *status* arquivado (`r sprintf("%s", amostra %>% filter(Pagamento=="arquivado") %>% select(obs))` observações). Deste total, o que foi levado em conta para esta análise é o grupo composto por todos os *status*, com exceção dos processos não pagos, o que deixa a amostra analisada com `r sprintf("%s", amostra %>% filter(Pagamento=="considerados") %>% select(obs))` observações.
+
+\clearpage
+
+# Linguagem
+
+Dentro da área de linguagens há a seguinte informação no que diz respeito à quantidade de projetos: 
+
+```{r grafico_contagem_linguagem, echo=FALSE,  fig.width=8, fig.height=6, out.width="15cm", out.height="15cm", include=TRUE}
+library(ggplot2)
+
+
+grafico_Contagem_Linguagem +
+  ggthemes::theme_hc()+
+  guia(6)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+
+# grafico_Contagem_Proj_Cor +
+#   ggthemes::theme_hc()+
+#   guia(6)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+# 
+# grafico_Contagem_Proj_Sexo +
+#   ggthemes::theme_hc()+
+#   guia(6)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+# 
+# grafico_Contagem_Contemplados +
+#   ggthemes::theme_hc()+
+#   guia(2)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  axis.ticks.x = element_blank())+
+#   tema1(7,8)+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+# 
+# grafico_Valores_Contemplados +
+#   ggthemes::theme_hc()+
+#   guia(2)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  axis.ticks.x = element_blank())+
+#   tema1(7,8)+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+
+```
+```{r linguagem_contagem, echo=FALSE, include=FALSE}
+max<-linguagem %>%
+  select(Linguagem,Num)%>%
+  slice(which.max(Num))
+
+min<-linguagem %>%
+  select(Linguagem,Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste(tolower(max$Linguagem), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Linguagem), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+linguagem2 <-linguagem %>%
+  mutate(Valor=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+
+xtab<-kable(linguagem2[c("Linguagem",
+                         "Num")], 
+            format = "latex", 
+            align = c("|l","r|"),
+            col.names = c("Linguagem","Número"),
+            caption = "Número de projetos por linguagem")
+xtab<-kableExtra::kable_styling(xtab, 
+                                font_size = 7, 
+                                position="center", 
+                                latex_options = "hold_position")
+```
+Os projetos de  **`r maximo_var`** projetos, enquanto que os projetos de **`r minimo_var`** projetos.
+
+
+`r xtab`  \clearpage
+
+```{r grafico_emprego_linguagem, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Empregos_Linguagem +
+  ggthemes::theme_hc()+
+  guia(6)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+```
+```{r linguagem_max_emprego, echo=FALSE, include=FALSE}
+# seleciona a maior quantidade
+max<-linguagem %>%
+  select(Linguagem,Empregos)%>%
+  slice(which.max(Empregos))
+
+#selecione a menor quantidade
+min<-linguagem %>%
+  select(Linguagem,Empregos)%>%
+  slice(which.min(Empregos))
+
+#seleciona a maior dispersão
+disp_max<-linguagem %>%
+  select(Linguagem,EmpregosSD)%>%
+  slice(which.max(EmpregosSD))
+
+#seleciona a mmenor dispersão
+disp_min<-linguagem %>%
+  select(Linguagem,EmpregosSD)%>%
+  slice(which.min(EmpregosSD))
+
+#Cria uma string com o maior resultado
+maximo_var<-paste(tolower(max$Linguagem), " tiveram o maior resultado, com ", 
+                  sprintf("%s", format(max$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o menor resultado
+minimo_var<-paste(tolower(min$Linguagem), " tiveram o menor resultado, com", 
+                  sprintf("%s", format(min$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Linguagem), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Linguagem), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+
+xtab<-kable(linguagem2[c("Linguagem",
+                         "Empregos",
+                         "EmpregosSD",
+                         "EmpregosMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Linguagem",
+                          "Empregos",
+                          "Desvio Padrão", 
+                          "Média"), 
+            digits = 2,
+            caption = "Empregos diretos gerados")
+xtab<-kableExtra::kable_styling(xtab, 
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+```
+No que diz respeito à geração de empregos diretos por linguagem, os projetos de **`r maximo_var`** empregos diretos gerados. enquanto que os projetos de **`r minimo_var`**. A dispersão dos empregos mostra que os projetos de **`r maximo_disp`**, enquanto que os projetos de **`r minimo_disp`**, o que é coerente com o número de observações de cada tipo de linguagem.
+
+`r xtab`  \clearpage
+
+```{r grafico_publico_linguagem, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Publico_Linguagem + 
+  ggthemes::theme_hc()+
+  guia(6)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+```
+```{r linguagem_publico, echo=FALSE, include=FALSE}
+max<-linguagem %>%
+  select(Linguagem,Publico)%>%
+  slice(which.max(Publico))
+
+min<-linguagem %>%
+  select(Linguagem,Publico)%>%
+  slice(which.min(Publico))
+
+#seleciona a maior dispersão
+disp_max<-linguagem %>%
+  select(Linguagem,PublicoSD)%>%
+  slice(which.max(PublicoSD))
+
+#seleciona a mmenor dispersão
+disp_min<-linguagem %>%
+  select(Linguagem,PublicoSD)%>%
+  slice(which.min(PublicoSD))
+
+
+maximo_var<-paste(tolower(max$Linguagem), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Publico, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Linguagem), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Publico, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Linguagem), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Linguagem), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(linguagem2[c("Linguagem",
+                         "Publico",
+                         "PublicoSD",
+                         "PublicoMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"),
+            col.names = c("Linguagem",
+                          "Público",
+                          "Desvio Padrão",
+                          "Média"),
+            digits = 2,
+            caption = "Público estimado por linguagem")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+```
+Quanto ao público estimado por linguagem, os projetos de **`r maximo_var`** pessoas. enquanto que os projetos de **`r minimo_var`** pessoas. Vale ressaltar que estes dados foram informados como público estimado, sem informar se isso é estimado antes ou depois do evento. A dispersão do público mostra que os projetos de **`r maximo_disp`**, enquanto que os projetos de **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_valor_linguagem, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Valores_Linguagem +
+  ggthemes::theme_hc()+
+  guia(6)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r linguagem_valor, echo=FALSE, include=FALSE}
+max<-linguagem %>%
+  select(Linguagem,Valor)%>%
+  slice(which.max(Valor))
+
+min<-linguagem %>%
+  select(Linguagem,Valor)%>%
+  slice(which.min(Valor))
+
+#seleciona a maior dispersão
+disp_max<-linguagem %>%
+  select(Linguagem,ValorSD)%>%
+  slice(which.max(ValorSD))
+
+#seleciona a mmenor dispersão
+disp_min<-linguagem %>%
+  select(Linguagem,ValorSD)%>%
+  slice(which.min(ValorSD))
+
+
+maximo_var<-paste(tolower(max$Linguagem), " tiveram o maior montante de valores liberados, com ", 
+              sprintf("R$ %s", format(max$Valor, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Linguagem), " tiveram o menor montante de valores liberados, com ", 
+              sprintf("R$ %s", format(min$Valor, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Linguagem), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_max$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Linguagem), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_min$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(linguagem2[c("Linguagem",
+                         "Valor",
+                         "ValorSD",
+                         "ValorMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Linguagem",
+                          "Valores Liberados",
+                          "Desvio Padrão", 
+                          "Média"), 
+            digits = 2, caption = "Valores liberados por linguagem")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+```
+No que diz respeito ao valor liberado por linguagem, os projetos de **`r maximo_var`**. Os projetos de **`r minimo_var`**. A dispersão por linguagem teve como resultados que os projetos de **`r maximo_disp`**, enquanto que os projetos de **`r minimo_disp`**, visto que os projetos de `r tolower(disp_min$Linguagem)` tiveram apenas duas observações e ambas de mesmo valor.
+
+`r xtab`  \clearpage
+
+\clearpage
+
+# Natureza Jurídica
+
+No que diz respeito à natureza jurídica, temos a seguinte informação sobre a quantidade de projetos: 
+
+```{r grafico_contagem_natureza, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_Natureza+
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+# grafico_Contagem_Natureza_Pie+
+#   ggthemes::theme_hc()+
+#   guia(1)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank(),
+#                  line = element_blank(),
+#                  axis.line = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+
+```
+```{r natureza_contagem, echo=FALSE, include=FALSE}
+#plural nos dados de natureza
+
+natureza<- natureza %>%
+  mutate(Natureza_Jurídica=as.factor(c("Pessoas Físicas","Pessoas Jurídicas")))
+
+max<-natureza %>%
+  select(Natureza_Jurídica,Num)%>%
+  slice(which.max(Num))
+
+min<-natureza %>%
+  select(Natureza_Jurídica,Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste(tolower(max$Natureza_Jurídica), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Natureza_Jurídica), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+amostra<-FAC2015_val %>%
+  filter(Pagamento!="não pago")%>%
+  group_by(Natureza_Jurídica) %>%
+  summarise(amostra=n())
+
+amostra<-rbind(amostra,c("total",sum(amostra$amostra)))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+natureza2 <-natureza %>%
+  mutate(Valor=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+
+xtab<-kable(natureza2[c("Natureza_Jurídica","Num")], format = "latex", 
+            align = c("|l","r|"), col.names = c("Natureza Jurídica","Número"), caption = "Número de projetos por natureza jurídica")
+xtab<-kableExtra::kable_styling(xtab, font_size = 7, position="center", latex_options = "hold_position")
+
+```
+Os projetos de  **`r maximo_var`** projetos, enquanto que os projetos de **`r minimo_var`**. 
+
+`r xtab`  \clearpage
+
+```{r grafico_emprego_natureza, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Empregos_Natureza+
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+# grafico_Empregos_Natureza_Pie+
+#   ggthemes::theme_hc()+
+#   guia(1)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+```
+```{r natureza_max_emprego, echo=FALSE, include=FALSE}
+# seleciona a maior quantidade
+max<-natureza %>%
+  select(Natureza_Jurídica,Empregos)%>%
+  slice(which.max(Empregos))
+
+#selecione a menor quantidade
+min<-natureza %>%
+  select(Natureza_Jurídica,Empregos)%>%
+  slice(which.min(Empregos))
+
+#seleciona a maior dispersão
+disp_max<-natureza %>%
+  select(Natureza_Jurídica,EmpregosSD)%>%
+  slice(which.max(EmpregosSD))
+
+#seleciona a mmenor dispersão
+disp_min<-natureza %>%
+  select(Natureza_Jurídica,EmpregosSD)%>%
+  slice(which.min(EmpregosSD))
+
+#Cria uma string com o maior resultado
+maximo_var<-paste(tolower(max$Natureza_Jurídica), " tiveram o maior resultado, com ", 
+                  sprintf("%s", format(max$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o menor resultado
+minimo_var<-paste(tolower(min$Natureza_Jurídica), " tiveram o menor resultado, com", 
+                  sprintf("%s", format(min$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Natureza_Jurídica), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Natureza_Jurídica), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(natureza2[c("Natureza_Jurídica",
+                        "Empregos",
+                        "EmpregosSD",
+                        "EmpregosMean")], 
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Natureza Jurídica","Empregos","Desvio Padrão", "Média"), 
+            digits = 2,
+            caption = "Empregos diretos gerados por natureza jurídica")
+xtab<-kableExtra::kable_styling(xtab, 
+                               font_size = 7, 
+                               position="center", 
+                               latex_options = "hold_position")
+
+
+```
+No que diz respeito à geração de empregos diretos por natureza jurídica, os projetos de **`r maximo_var`** empregos diretos gerados. enquanto que os projetos de **`r minimo_var`**. A dispersão dos empregos mostra que os projetos de **`r maximo_disp`**, enquanto que os projetos de **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_publico_natureza, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Publico_Natureza + 
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+# grafico_Publico_Natureza_Pie + 
+#   ggthemes::theme_hc()+
+#   guia(1)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+```
+```{r natureza_publico, echo=FALSE, include=FALSE}
+max<-natureza %>%
+  select(Natureza_Jurídica,Publico)%>%
+  slice(which.max(Publico))
+
+min<-natureza %>%
+  select(Natureza_Jurídica,Publico)%>%
+  slice(which.min(Publico))
+
+#seleciona a maior dispersão
+disp_max<-natureza %>%
+  select(Natureza_Jurídica,PublicoSD)%>%
+  slice(which.max(PublicoSD))
+
+#seleciona a mmenor dispersão
+disp_min<-natureza %>%
+  select(Natureza_Jurídica,PublicoSD)%>%
+  slice(which.min(PublicoSD))
+
+
+maximo_var<-paste(tolower(max$Natureza_Jurídica), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Publico, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Natureza_Jurídica), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Publico, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Natureza_Jurídica), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Natureza_Jurídica), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(natureza2[c("Natureza_Jurídica",
+                         "Publico",
+                         "PublicoSD",
+                         "PublicoMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"),
+            col.names = c("Natureza Jurídica",
+                          "Público",
+                          "Desvio Padrão",
+                          "Média"),
+            digits = 2,
+            caption = "Público estimado por natureza jurídica")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+```
+
+Quanto ao público estimado por natureza jurídica, os projetos de **`r maximo_var`** pessoas, enquanto que os projetos de **`r minimo_var`** pessoas. Vale ressaltar que estes dados foram informados como público estimado, sem informar se isso é estimado antes ou depois do evento. A dispersão do público mostra que os projetos de **`r maximo_disp`**, enquanto que os projetos de **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_valor_natureza, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Valores_Natureza + 
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r natureza_valor, echo=FALSE, include=FALSE}
+max<-natureza %>%
+  select(Natureza_Jurídica,Valor)%>%
+  slice(which.max(Valor))
+
+min<-natureza %>%
+  select(Natureza_Jurídica,Valor)%>%
+  slice(which.min(Valor))
+
+#seleciona a maior dispersão
+disp_max<-natureza %>%
+  select(Natureza_Jurídica,ValorSD)%>%
+  slice(which.max(ValorSD))
+
+#seleciona a mmenor dispersão
+disp_min<-natureza %>%
+  select(Natureza_Jurídica,ValorSD)%>%
+  slice(which.min(ValorSD))
+
+
+maximo_var<-paste(tolower(max$Natureza_Jurídica), " tiveram o maior montante de valores liberados, com ", 
+              sprintf("R$ %s", format(max$Valor, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Natureza_Jurídica), " tiveram o menor montante de valores liberados, com ", 
+              sprintf("R$ %s", format(min$Valor, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Natureza_Jurídica), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_max$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Natureza_Jurídica), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_min$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(natureza2[c("Natureza_Jurídica",
+                         "Valor",
+                         "ValorSD",
+                         "ValorMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Natureza Jurídica",
+                          "Valores Liberados",
+                          "Desvio Padrão", 
+                          "Média"), 
+            digits = 2, caption = "Valores liberados por natureza jurídica")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+```
+No que diz respeito ao valor liberado por natureza jurídica, os projetos de **`r maximo_var`**. Os projetos de **`r minimo_var`**. A dispersão por natureza jurídica teve como resultados que os projetos de **`r maximo_disp`**, enquanto que os projetos de **`r minimo_disp`**. 
+
+`r xtab`  \clearpage
+
+\clearpage
+
+# Gênero
+
+As informações de gênero estão contidas no conjunto de projetos produzidos por pessoas físicas. Entretanto, vale ressaltar uma das incongruências da base enviada pela Secretaria de Cultura, visto que há diversas variáveis com informações de sexo para pessoas jurídicas. De toda forma, para esta análise foi levada em conta apenas as informações de pessoas físicas, de modo que isso não altera as informações aqui analisadas. Vale ressaltar ainda que houveram `r sprintf("%s", sexo %>% filter(Sexo=="Não informado") %>% select(Num))` observações não informadas. Elas fazem parte das estatísticas também, de modo que serão informadas nos gráficos a seguir.
+
+```{r grafico_contagem_sexo, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_Sexo + 
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+# grafico_Contagem_Sexo_Pie + 
+#   ggthemes::theme_hc()+
+#   guia(1)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+```
+
+```{r sexo_contagem, echo=FALSE, include=FALSE}
+#mudar plural
+sexo<-sexo %>%
+  mutate(Sexo=c("Femininos","Masculinos","Não informados"))
+
+max<-sexo %>%
+  select(Sexo,Num)%>%
+  slice(which.max(Num))
+
+min<-sexo %>%
+  select(Sexo,Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste(tolower(max$Sexo), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Sexo), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+sexo2 <-sexo %>%
+  mutate(Valor=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+
+xtab<-kable(sexo2[c("Sexo","Num")], format = "latex", 
+            align = c("|l","r|"), col.names = c("Sexo","Número"), caption = "Número de projetos por sexo")
+xtab<-kableExtra::kable_styling(xtab, font_size = 7, position="center", latex_options = "hold_position")
+
+```
+Os projetos de proponentes  **`r maximo_var`** projetos, enquanto que os projetos de proponentes **`r minimo_var`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_emprego_sexo, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Empregos_Sexo + 
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+
+# grafico_Empregos_Sexo_Pie + 
+#   ggthemes::theme_hc()+
+#   guia(1)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+```
+```{r sexo_max_emprego, echo=FALSE, include=FALSE}
+# seleciona a maior quantidade
+max<-sexo %>%
+  select(Sexo,Empregos)%>%
+  slice(which.max(Empregos))
+
+#selecione a menor quantidade
+min<-sexo %>%
+  select(Sexo,Empregos)%>%
+  slice(which.min(Empregos))
+
+#seleciona a maior dispersão
+disp_max<-sexo %>%
+  select(Sexo,EmpregosSD)%>%
+  slice(which.max(EmpregosSD))
+
+#seleciona a mmenor dispersão
+disp_min<-sexo %>%
+  select(Sexo,EmpregosSD)%>%
+  slice(which.min(EmpregosSD))
+
+#Cria uma string com o maior resultado
+maximo_var<-paste(tolower(max$Sexo), " tiveram o maior resultado, com ", 
+                  sprintf("%s", format(max$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o menor resultado
+minimo_var<-paste(tolower(min$Sexo), " tiveram o menor resultado, com", 
+                  sprintf("%s", format(min$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Sexo), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Sexo), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(sexo2[c("Sexo",
+                    "Empregos","EmpregosSD","EmpregosMean")], format = "latex",
+            align = c("|l","r","r","r|"), col.names = c("Natureza Jurídica","Empregos","Desvio Padrão", "Média"), digits = 2,
+            caption = "Empregos diretos gerados por sexo")
+xtab<-kableExtra::kable_styling(xtab, font_size = 7, position="center", latex_options = "hold_position")
+
+
+```
+No que diz respeito à geração de empregos diretos por sexo, os projetos de proponentes **`r maximo_var`** empregos diretos gerados, enquanto que os projetos de proponentes **`r minimo_var`**. A dispersão dos empregos mostra que os projetos de proponentes **`r maximo_disp`**, enquanto que os projetos de **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_publico_sexo, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Publico_Sexo + 
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+
+# grafico_Publico_Sexo_Pie + 
+#   ggthemes::theme_hc()+
+#   guia(1)+
+#   ggplot2::theme(legend.position = "bottom",
+#                  axis.title.x = element_blank(),
+#                  axis.title.y = element_blank(),
+#                  legend.text = element_text(size=7),
+#                  axis.ticks.x = element_blank())+
+#   ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+#                                       r=margens["direita"], 
+#                                       b=margens["baixo"], 
+#                                       l=margens["esquerda"], 
+#                                       unit="pt"))
+```
+```{r sexo_publico, echo=FALSE, include=FALSE}
+max<-sexo %>%
+  select(Sexo,Publico)%>%
+  slice(which.max(Publico))
+
+min<-sexo %>%
+  select(Sexo,Publico)%>%
+  slice(which.min(Publico))
+
+#seleciona a maior dispersão
+disp_max<-sexo %>%
+  select(Sexo,PublicoSD)%>%
+  slice(which.max(PublicoSD))
+
+#seleciona a mmenor dispersão
+disp_min<-sexo %>%
+  select(Sexo,PublicoSD)%>%
+  slice(which.min(PublicoSD))
+
+
+maximo_var<-paste(tolower(max$Sexo), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Publico, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Sexo), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Publico, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Sexo), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Sexo), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(sexo2[c("Sexo",
+                         "Publico",
+                         "PublicoSD",
+                         "PublicoMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"),
+            col.names = c("Sexo",
+                          "Público",
+                          "Desvio Padrão",
+                          "Média"),
+            digits = 2,
+            caption = "Público estimado por sexo")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+```
+
+Quanto ao público estimado por sexo, os projetos de proponentes **`r maximo_var`** pessoas, enquanto que os projetos de proponentes **`r minimo_var`** pessoas. Vale ressaltar que estes dados foram informados como público estimado, sem informar se isso é estimado antes ou depois do evento. A dispersão do público mostra que os projetos de proponentes **`r maximo_disp`**, enquanto que os projetos de proponentes **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_valor_sexo, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Valores_Sexo + 
+  ggthemes::theme_hc()+
+  guia(1)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r sexo_valor, echo=FALSE, include=FALSE}
+max<-sexo %>%
+  select(Sexo,Valor)%>%
+  slice(which.max(Valor))
+
+min<-sexo %>%
+  select(Sexo,Valor)%>%
+  slice(which.min(Valor))
+
+#seleciona a maior dispersão
+disp_max<-sexo %>%
+  select(Sexo,ValorSD)%>%
+  slice(which.max(ValorSD))
+
+#seleciona a mmenor dispersão
+disp_min<-sexo %>%
+  select(Sexo,ValorSD)%>%
+  slice(which.min(ValorSD))
+
+
+maximo_var<-paste(tolower(max$Sexo), " tiveram o maior montante de valores liberados, com ", 
+              sprintf("R$ %s", format(max$Valor, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Sexo), " tiveram o menor montante de valores liberados, com ", 
+              sprintf("R$ %s", format(min$Valor, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Sexo), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_max$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Sexo), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_min$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(sexo2[c("Sexo",
+                         "Valor",
+                         "ValorSD",
+                         "ValorMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Sexo",
+                          "Valores Liberados",
+                          "Desvio Padrão", 
+                          "Média"), 
+            digits = 2, caption = "Valores liberados por sexo")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+```
+No que diz respeito ao valor liberado por sexo, os projetos de proponentes **`r maximo_var`**. Os projetos de proponentes **`r minimo_var`**. A dispersão por linguagem teve como resultados que os projetos de proponentes **`r maximo_disp`**, enquanto que os projetos de proponentes **`r minimo_disp`**. 
+
+`r xtab`  \clearpage
+
+\clearpage
+
+# Cor ou raça
+
+As informações de cor ou raça estão contidas no conjunto de projetos produzidos por pessoas físicas. Entretanto, vale ressaltar mais uma das incongruências da base enviada pela Secretaria de Cultura, visto que há diversas variáveis com informações de cor ou raça para pessoas jurídicas. De toda forma, para esta análise foi levada em conta apenas as informações de pessoas físicas, de modo que isso não altera as informações aqui analisadas. Há registro também de `r sprintf("%s", cor %>% filter(Cor=="Não informado") %>% select(Num))` observações não informadas. Elas fazem parte das estatísticas também, de modo que serão informadas nos gráficos a seguir.
+
+```{r grafico_contagem_cor, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_Cor + 
+  ggthemes::theme_hc()+
+  guia(2)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())
+```
+```{r cor_contagem, echo=FALSE, include=FALSE}
+#mudar plural
+cor<-cor %>%
+  mutate(Cor=c("Amarelas","Brancas", "Indígenas", "Não informadas", "Pardas", "Pretas"))
+
+
+max<-cor %>%
+  select(Cor,Num)%>%
+  slice(which.max(Num))
+
+min<-cor %>%
+  select(Cor,Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste(tolower(max$Cor), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Cor), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+cor <-cor %>%
+  mutate(Valor=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+
+xtab<-kable(cor[c("Cor","Num")], format = "latex", 
+            align = c("|l","r|"), col.names = c("Cor","Número"), caption = "Número de projetos por cor")
+xtab<-kableExtra::kable_styling(xtab, font_size = 7, position="center", latex_options = "hold_position")
+
+```
+Os projetos vindos de pessoas **`r maximo_var`** projetos, enquanto que os projetos vindos de pessoas **`r minimo_var`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_emprego_cor, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Empregos_Cor + 
+  ggthemes::theme_hc()+
+  guia(2)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())
+```
+```{r cor_max_emprego, echo=FALSE, include=FALSE}
+# seleciona a maior quantidade
+max<-cor %>%
+  select(Cor,Empregos)%>%
+  slice(which.max(Empregos))
+
+#selecione a menor quantidade
+min<-cor %>%
+  select(Cor,Empregos)%>%
+  slice(which.min(Empregos))
+
+#seleciona a maior dispersão
+disp_max<-cor %>%
+  select(Cor,EmpregosSD)%>%
+  slice(which.max(EmpregosSD))
+
+#seleciona a mmenor dispersão
+disp_min<-cor %>%
+  select(Cor,EmpregosSD)%>%
+  slice(which.min(EmpregosSD))
+
+#Cria uma string com o maior resultado
+maximo_var<-paste(tolower(max$Cor), " tiveram o maior resultado, com ", 
+                  sprintf("%s", format(max$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o menor resultado
+minimo_var<-paste(tolower(min$Cor), " tiveram o menor resultado, com", 
+                  sprintf("%s", format(min$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Cor), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Cor), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(cor[c("Cor","Empregos","EmpregosSD","EmpregosMean")], format = "latex",
+            align = c("|l","r","r","r|"), col.names = c("Cor","Empregos","Desvio Padrão", "Média"), digits = 2,
+            caption = "Empregos diretos gerados por cor")
+xtab<-kableExtra::kable_styling(xtab, font_size = 7, position="center", latex_options = "hold_position")
+
+
+```
+No que diz respeito à geração de empregos diretos por cor ou raça, os projetos vindos de pessoas **`r maximo_var`** empregos diretos gerados, enquanto que os projetos vindos de pessoas **`r minimo_var`**. A dispersão dos empregos mostra que os projetos vindos de pessoas **`r maximo_disp`**, enquanto que os projetos vindos de pessoas **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_publico_cor, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Publico_Cor + 
+  ggthemes::theme_hc()+
+  guia(2)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r cor_publico, echo=FALSE, include=FALSE}
+max<-cor %>%
+  select(Cor,Publico)%>%
+  slice(which.max(Publico))
+
+min<-cor %>%
+  select(Cor,Publico)%>%
+  slice(which.min(Publico))
+
+#seleciona a maior dispersão
+disp_max<-cor %>%
+  select(Cor,PublicoSD)%>%
+  slice(which.max(PublicoSD))
+
+#seleciona a mmenor dispersão
+disp_min<-cor %>%
+  select(Cor,PublicoSD)%>%
+  slice(which.min(PublicoSD))
+
+
+maximo_var<-paste(tolower(max$Cor), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Publico, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Cor), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Publico, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Cor), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Cor), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(cor[c("Cor",
+                         "Publico",
+                         "PublicoSD",
+                         "PublicoMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"),
+            col.names = c("Cor",
+                          "Público",
+                          "Desvio Padrão",
+                          "Média"),
+            digits = 2,
+            caption = "Público estimado por cor")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+
+```
+
+Quanto ao público estimado por cor ou raça, os projetos vindos de pessoas **`r maximo_var`** pessoas, enquanto que os projetos vindos de pessoas **`r minimo_var`** pessoas. Vale ressaltar que estes dados foram informados como público estimado, sem informar se isso é estimado antes ou depois do evento. A dispersão do público mostra que os projetos pessoas **`r maximo_disp`**, enquanto que os projetos **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_valor_cor, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Valores_Cor + 
+  ggthemes::theme_hc()+
+  guia(2)+
+  ggplot2::theme(legend.position = "bottom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+  
+```
+```{r cor_valor, echo=FALSE, include=FALSE}
+max<-cor %>%
+  select(Cor,Valor)%>%
+  slice(which.max(Valor))
+
+min<-cor %>%
+  select(Cor,Valor)%>%
+  slice(which.min(Valor))
+
+#seleciona a maior dispersão
+disp_max<-cor %>%
+  select(Cor,ValorSD)%>%
+  slice(which.max(ValorSD))
+
+#seleciona a mmenor dispersão
+disp_min<-cor %>%
+  select(Cor,ValorSD)%>%
+  slice(which.min(ValorSD))
+
+
+maximo_var<-paste(tolower(max$Cor), " tiveram o maior montante de valores liberados, com ", 
+              sprintf("R$ %s", format(max$Valor, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Cor), " tiveram o menor montante de valores liberados, com ", 
+              sprintf("R$ %s", format(min$Valor, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Cor), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_max$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Cor), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_min$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(cor[c("Cor",
+                         "Valor",
+                         "ValorSD",
+                         "ValorMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Cor",
+                          "Valores Liberados",
+                          "Desvio Padrão", 
+                          "Média"), 
+            digits = 2, caption = "Valores liberados por cor")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+```
+No que diz respeito ao valor liberado por cor ou raça, os projetos de pessoas **`r maximo_var`**. Os projetos de pessoas **`r minimo_var`**. A dispersão por linguagem teve como resultados que os projetos de pessoas **`r maximo_disp`**, enquanto que os projetos de pessoas **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+\clearpage
+
+
+# Escolaridade
+
+As informações de escolaridade estão contidas no conjunto de projetos produzidos por pessoas físicas. A base enviada pela Secretaria de Cultura contém também informações de escolaridade para pessoas jurídicas. De toda forma, para esta análise foi levada em conta apenas as informações de pessoas físicas, de modo que isso não altera as informações aqui analisadas. Vale ressaltar também que houveram `r sprintf("%s", escolaridade %>% filter(Escolaridade=="Não informado") %>% select(Num))` observações não informadas. Elas fazem parte das estatísticas também, de modo que serão informadas nos gráficos a seguir.
+
+```{r grafico_contagem_escolaridade, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_Escolaridade + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r escolaridade_contagem, echo=FALSE, include=FALSE}
+#mudar plural
+escolaridade <- escolaridade %>%
+  mutate(Escolaridade=as.character(Escolaridade),Escolaridade=ifelse(Escolaridade=="Analfabeto","Analfabeta",Escolaridade))
+
+
+max <- escolaridade %>%
+  select(Escolaridade,Num)%>%
+  slice(which.max(Num))
+
+min <- escolaridade %>%
+  select(Escolaridade,Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste(tolower(max$Escolaridade), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Escolaridade), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+escolaridade2 <-escolaridade %>%
+  mutate(Valor=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+
+xtab<-kable(escolaridade2[c("Escolaridade",
+                            "Num")],
+            format = "latex", 
+            align = c("|l","r|"), 
+            col.names = c("Escolaridade",
+                          "Número"),
+            caption = "Escolaridade")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+```
+Os projetos vindos de pessoas com formação **`r maximo_var`** projetos, enquanto que os projetos vindos de pessoas com formação **`r minimo_var`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_emprego_escolaridade, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Empregos_Escolaridade + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r escolaridade_max_emprego, echo=FALSE, include=FALSE}
+# seleciona a maior quantidade
+max <- escolaridade %>%
+  select(Escolaridade,Empregos)%>%
+  slice(which.max(Empregos))
+
+#selecione a menor quantidade
+min <- escolaridade %>%
+  select(Escolaridade,Empregos)%>%
+  slice(which.min(Empregos))
+
+#seleciona a maior dispersão
+disp_max <- escolaridade %>%
+  select(Escolaridade,EmpregosSD)%>%
+  slice(which.max(EmpregosSD))
+
+#seleciona a mmenor dispersão
+disp_min<-escolaridade %>%
+  select(Escolaridade,EmpregosSD)%>%
+  slice(which.min(EmpregosSD))
+
+#Cria uma string com o maior resultado
+maximo_var<-paste(tolower(max$Escolaridade), " tiveram o maior resultado, com ", 
+                  sprintf("%s", format(max$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o menor resultado
+minimo_var<-paste(tolower(min$Escolaridade), " tiveram o menor resultado, com", 
+                  sprintf("%s", format(min$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Escolaridade), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Escolaridade), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(escolaridade2[c("Escolaridade",
+                            "Empregos",
+                            "EmpregosSD",
+                            "EmpregosMean")], 
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Escolaridade",
+                          "Empregos",
+                          "Desvio Padrão",
+                          "Média"), 
+            digits = 2,
+            caption = "Empregos diretos gerados por escolaridade")
+xtab<-kableExtra::kable_styling(xtab, 
+                                font_size = 7, 
+                                position="center", 
+                                latex_options = "hold_position")
+
+
+
+```
+No que diz respeito à geração de empregos diretos por escolaridade, os projetos vindos de pessoas com formação **`r maximo_var`** empregos diretos gerados, enquanto que os projetos vindos de pessoas com formação **`r minimo_var`**. A dispersão dos empregos mostra que os projetos vindos de pessoas com formação **`r maximo_disp`**, enquanto que os projetos vindos de pessoas com formação **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_publico_escolaridade, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Publico_Escolaridade+
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+  
+```
+```{r escolaridade_publico, echo=FALSE, include=FALSE}
+max <- escolaridade %>%
+  select(Escolaridade,Publico)%>%
+  slice(which.max(Publico))
+
+min <- escolaridade %>%
+  select(Escolaridade,Publico)%>%
+  slice(which.min(Publico))
+
+#seleciona a maior dispersão
+disp_max <- escolaridade %>%
+  select(Escolaridade,PublicoSD)%>%
+  slice(which.max(PublicoSD))
+
+#seleciona a mmenor dispersão
+disp_min<-escolaridade %>%
+  select(Escolaridade,PublicoSD)%>%
+  slice(which.min(PublicoSD))
+
+
+maximo_var<-paste(tolower(max$Escolaridade), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Publico, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Escolaridade), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Publico, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Escolaridade), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Escolaridade), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(escolaridade2[c("Escolaridade",
+                         "Publico",
+                         "PublicoSD",
+                         "PublicoMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"),
+            col.names = c("Escolaridade",
+                          "Público",
+                          "Desvio Padrão",
+                          "Média"),
+            digits = 2,
+            caption = "Público estimado por escolaridade")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+```
+
+Quanto ao público estimado por escolaridade, os projetos vindos de pessoas com formação **`r maximo_var`** pessoas, enquanto que os projetos vindos de pessoas com formação **`r minimo_var`** pessoas. Vale ressaltar que estes dados foram informados como público estimado, sem informar se isso é estimado antes ou depois do evento. A dispersão do público mostra que os projetos pessoas com formação **`r maximo_disp`**, enquanto que os projetos com formação **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_valor_escolaridade, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Valores_Escolaridade + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r escolaridade_valor, echo=FALSE, include=FALSE}
+max <- escolaridade %>%
+  select(Escolaridade,Valor)%>%
+  slice(which.max(Valor))
+
+min<-escolaridade %>%
+  select(Escolaridade,Valor)%>%
+  slice(which.min(Valor))
+
+#seleciona a maior dispersão
+disp_max <- escolaridade %>%
+  select(Escolaridade,ValorSD)%>%
+  slice(which.max(ValorSD))
+
+#seleciona a mmenor dispersão
+disp_min<-escolaridade %>%
+  select(Escolaridade,ValorSD)%>%
+  slice(which.min(ValorSD))
+
+
+maximo_var<-paste(tolower(max$Escolaridade), " tiveram o maior montante de valores liberados, com ", 
+              sprintf("R$ %s", format(max$Valor, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste(tolower(min$Escolaridade), " tiveram o menor montante de valores liberados, com ", 
+              sprintf("R$ %s", format(min$Valor, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste(tolower(disp_max$Escolaridade), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_max$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste(tolower(disp_min$Escolaridade), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_min$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(escolaridade2[c("Escolaridade",
+                         "Valor",
+                         "ValorSD",
+                         "ValorMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("Escolaridade",
+                          "Valores Liberados",
+                          "Desvio Padrão", 
+                          "Média"), 
+            digits = 2, caption = "Valores liberados por escolaridade")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+```
+No que diz respeito ao valor liberado por escolaridade, os projetos de pessoas com formação **`r maximo_var`**. Os projetos de pessoas com  formação **`r minimo_var`**. A dispersão por escolaridade teve como resultados que os projetos de pessoas com formação **`r maximo_disp`**, enquanto que os projetos de pessoas com formação **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+\clearpage
+
+# Regiões administrativas
+
+Há duas abordagens possíveis quanto às RAs. As informações disponíveis estão divididas em duas categorias: a primeira é quanto à residência dos proponentes dos projetos e o segundo em relação às regiões administratrativas afetadas pelos projetos. A primeira parte será focada nas residências dos proponentes.
+
+## Regiões administrativas de residência dos proponentes
+
+```{r grafico_contagem_cidades, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_RA_Proponente + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r cidades_contagem, echo=FALSE, include=FALSE}
+#mudar plural
+cidades<-cidades %>%
+  mutate(RA_Proponente=as.character(RA_Proponente), RA_Proponente=RA_Proponente)
+
+
+
+
+max <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  Num)%>%
+  slice(which.max(Num))
+
+min <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste((max$RA_Proponente), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$RA_Proponente), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+cidades <-cidades %>%
+  mutate(Valor=sprintf("R$ %s", format(Valor,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+
+xtab <- kable(cidades[c("RA_Proponente",
+                         "Num")], 
+              format = "latex", 
+            align = c("|l","r|"), 
+            col.names = c("RA_Proponente",
+                          "Número"), 
+            caption = "Número de projetos por Região Administrativa dos proponentes")
+xtab <- kableExtra::kable_styling(xtab,
+                                  font_size = 7, 
+                                  position="center",
+                                  latex_options = "hold_position")
+
+```
+Os projetos vindos de pessoas da RA **`r maximo_var`** projetos, enquanto que os projetos vindos de pessoas da RA **`r minimo_var`**. 
+
+`r xtab`  \clearpage
+
+```{r grafico_emprego_cidades, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Empregos_RA_Proponente + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r cidades_max_emprego, echo=FALSE, include=FALSE}
+# seleciona a maior quantidade
+max <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,Empregos)%>%
+  slice(which.max(Empregos))
+unique(cidades$RA_Proponente)
+#selecione a menor quantidade
+min <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  Empregos)%>%
+  slice(which.min(Empregos))
+
+#seleciona a maior dispersão
+disp_max <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  EmpregosSD)%>%
+  slice(which.max(EmpregosSD))
+
+#seleciona a mmenor dispersão
+disp_min<- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  EmpregosSD)%>%
+  slice(which.min(EmpregosSD))
+
+#Cria uma string com o maior resultado
+maximo_var<-paste((max$RA_Proponente), " tiveram o maior resultado, com ", 
+                  sprintf("%s", format(max$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o menor resultado
+minimo_var<-paste((min$RA_Proponente), " tiveram o menor resultado, com", 
+                  sprintf("%s", format(min$Empregos, big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste((disp_max$RA_Proponente), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste((disp_min$RA_Proponente), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$EmpregosSD,2), big.mark = ".", decimal.mark = ",")))
+
+xtab<-kable(cidades[c("RA_Proponente","Empregos","EmpregosSD","EmpregosMean")], 
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("RA Proponente","Empregos","Desvio Padrão", "Média"), 
+            digits = 2,
+            caption = "Empregos diretos gerados por Região Administrativa dos proponentes")
+xtab<-kableExtra::kable_styling(xtab, 
+                                font_size = 7, 
+                                position="center", 
+                                latex_options = "hold_position")
+
+
+```
+No que diz respeito à geração de empregos diretos por região administrativa do proponente, os projetos vindos de pessoas da RA **`r maximo_var`** empregos diretos gerados, enquanto que os projetos vindos de pessoas da RA **`r minimo_var`**. A dispersão dos empregos mostra que os projetos vindos de pessoas de **`r maximo_disp`**, enquanto que os projetos vindos de pessoas de **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_publico_cidades, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Publico_RA_Proponente + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r cidades_publico, echo=FALSE, include=FALSE}
+max <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  Publico)%>%
+  slice(which.max(Publico))
+
+min <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  Publico)%>%
+  slice(which.min(Publico))
+
+#seleciona a maior dispersão
+disp_max <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  PublicoSD)%>%
+  slice(which.max(PublicoSD))
+
+#seleciona a mmenor dispersão
+disp_min<- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  PublicoSD)%>%
+  slice(which.min(PublicoSD))
+
+
+maximo_var<-paste((max$RA_Proponente), " tiveram o maior resultado, com ", 
+              sprintf("%s", format(max$Publico, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$RA_Proponente), " tiveram o menor resultado, com ", 
+              sprintf("%s", format(min$Publico, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste((disp_max$RA_Proponente), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_max$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste((disp_min$RA_Proponente), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("%s", format(round(disp_min$PublicoSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(cidades[c("RA_Proponente",
+                         "Publico",
+                         "PublicoSD",
+                         "PublicoMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"),
+            col.names = c("RA Proponente",
+                          "Público",
+                          "Desvio Padrão",
+                          "Média"),
+            digits = 2,
+            caption = "Público estimado por Região Administrativa dos proponentes")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+```
+
+Quanto ao público estimado por região administrativa do proponente, os projetos vindos de pessoas da RA **`r maximo_var`** pessoas, enquanto que os projetos vindos de pessoas da RA **`r minimo_var`** pessoas. Vale ressaltar que estes dados foram informados como público estimado, sem informar se isso é estimado antes ou depois do evento. A dispersão do público mostra que os projetos pessoas da RA **`r maximo_disp`**, enquanto que os projetos de pessoas da RA **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+```{r grafico_valor_cidades, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Valores_RA_Proponente + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r cidades_valor, echo=FALSE, include=FALSE}
+max <- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  Valor)%>%
+  slice(which.max(Valor))
+
+min<-cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  Valor)%>%
+  slice(which.min(Valor))
+
+#seleciona a maior dispersão
+disp_max <- cidades %>%
+  select(RA_Proponente,  ValorSD)%>%
+  slice(which.max(ValorSD))
+
+#seleciona a mmenor dispersão
+disp_min<- cidades %>%
+  filter(Num>1) %>%
+  select(RA_Proponente,  ValorSD)%>%
+  slice(which.min(ValorSD))
+
+
+maximo_var<-paste((max$RA_Proponente), " tiveram o maior nível  de valores liberados, com ", 
+              sprintf("R$ %s", format(max$Valor, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$RA_Proponente), " tiveram o menor montante de valores liberados, com ", 
+              sprintf("R$ %s", format(min$Valor, big.mark = ".", decimal.mark = ",")))
+
+#cria uma string com o maior desvio padrão
+maximo_disp<-paste((disp_max$RA_Proponente), " tiveram a maior dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_max$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+#cria uma string com o maior desvio padrão
+minimo_disp<-paste((disp_min$RA_Proponente), "tiveram a menor dispersão, com um desvio padrão de ", 
+                   sprintf("R$ %s", format(round(disp_min$ValorSD,2), big.mark = ".", decimal.mark = ",")))
+
+
+xtab<-kable(cidades[c("RA_Proponente",
+                         "Valor",
+                         "ValorSD",
+                         "ValorMean")],
+            format = "latex",
+            align = c("|l","r","r","r|"), 
+            col.names = c("RA Proponente",
+                          "Valores Liberados",
+                          "Desvio Padrão", 
+                          "Média"), 
+            digits = 2, caption = "Valores liberados por Região Administrativa dos proponentes")
+xtab<-kableExtra::kable_styling(xtab,
+                                font_size = 7,
+                                position="center",
+                                latex_options = "hold_position")
+
+
+```
+No que diz respeito ao valor liberado por região administrativa do proponente, os projetos de pessoas da RA **`r maximo_var`**. Os projetos de pessoas da RA **`r minimo_var`**. A dispersão por região administrativa teve como resultados que os projetos de pessoas da RA **`r maximo_disp`**, enquanto que os projetos de pessoas da RA **`r minimo_disp`**.
+
+`r xtab`  \clearpage
+
+\clearpage
+
+## Regiões administrativas impactadas pelos projetos
+
+No que diz respeito ao impacto dos projetos, a planilha enviada pela Secretaria de Cultura agrupou os dados em diversas colunas de cada RA com um registro caso o projeto tenha ou não atingido a região. Vale ressaltar neste caso que há projetos que não informam as RAs atingidas, de modo que os dados de valores Liberados, se somados, não são iguais ao montante total pago. 
+
+```{r grafico_contagem_cidades_atingida, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_RA_Atingida+
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r cidades_atingidas_contagem, echo=FALSE, include=FALSE}
+max <- cidades_atingidas %>%
+  filter(Num>2) %>%
+  select(Cidades,  Num)%>%
+  slice(which.max(Num))
+
+min <- cidades_atingidas %>%
+  filter(Num>2) %>%
+  select(Cidades,  Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste((max$Cidades), ", que teve o maior resultado, que foi atingida ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$Cidades), " teve o menor resultado,  sendo atingida ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+cidades_atingidas2 <- cidades_atingidas %>%
+  mutate(Valor=sprintf("R$ %s", format(ValoresMedios,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+xtab <- kable(cidades_atingidas2[c("Cidades",
+                         "Num")],
+            format = "latex",
+            align = c("|l","r|"), 
+            col.names = c("RA Atingida",
+                          "Número"), 
+            digits = 2, 
+            caption = "Número de projetos por Regiões Administrativas atingidas")
+xtab <- kableExtra::kable_styling(xtab,
+                                  font_size = 7,
+                                  position="center",
+                                  latex_options = "hold_position")
+
+```
+No que diz respeito à quantidade de vezes em que os projetos atigiram alguma RA, temos o destaque para a RA `r maximo_var` vezes pelos projetos pagos, enquanto que temos uma situação de baixo desempenho, onde a RA `r minimo_var` vezes pelos projetos pagos.
+
+`r xtab`
+\clearpage
+
+```{r grafico_valor_cidades_atingida, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Valores_RA_Atingida + 
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r cidades_atingidas_valor, echo=FALSE, include=FALSE}
+max <- cidades_atingidas %>%
+  filter(Num>2) %>%
+  select(Cidades,  ValoresMedios)%>%
+  slice(which.max(ValoresMedios))
+
+min <- cidades_atingidas %>%
+  filter(Num>2) %>%
+  select(Cidades,  ValoresMedios)%>%
+  slice(which.min(ValoresMedios))
+
+
+maximo_var<-paste((max$Cidades), " tiveram o maior montante de valores médios liberados, com um total de", 
+              sprintf("R$ %s", format(max$ValoresMedios, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$Cidades), " tiveram o menor montante de valores médios liberados, com um total de", 
+              sprintf("R$ %s", format(min$ValoresMedios, big.mark = ".", decimal.mark = ",")))
+
+xtab <- kable(cidades_atingidas2[c("Cidades",
+                         "Valor")],
+            format = "latex",
+            align = c("|l","r|"), 
+            col.names = c("RA Atingida",
+                          "Valores Médios"), 
+            digits = 2, 
+            caption = "Valores médios totais por Regiões Administrativas atingidas")
+xtab <- kableExtra::kable_styling(xtab,
+                                  font_size = 7,
+                                  position="center",
+                                  latex_options = "hold_position")
+
+```
+Neste tópico, os projetos que atingiram a RA `r maximo_var`, enquanto que os projetos que atingiram a RA `r minimo_var`. Vale lembrar que o valor médio é a distribuição de um valor liberado para um projeto entre todas as RAs que este atinge, sendo o resultado aqui mostrado a soma de todos os valores médios de todos os projetos.
+
+`r xtab` 
+\clearpage
+
+# Modalidades
+
+```{r grafico_contagem_modalidades, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+grafico_Contagem_Modalidades +
+  ggthemes::theme_hc()+
+  guia(6)+
+  ggplot2::theme(#legend.position = "buttom",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 legend.text = element_text(size=7),
+                 axis.ticks.x = element_blank())+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+
+```{r modalidades_contagem, echo=FALSE, include=FALSE}
+max <- modalidades %>%
+  filter(Num>2) %>%
+  select(Modalidade,  Num)%>%
+  slice(which.max(Num))
+
+min <- modalidades %>%
+  filter(Num>2) %>%
+  select(Modalidade,  Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste((max$Modalidade), ", que teve o maior resultado, que foi atingida ", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$Modalidade), " teve o menor resultado,  sendo atingida ", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+# modalidades2 <- modalidades %>%
+#   mutate(Valor=sprintf("R$ %s", format(ValoresMedios,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+# xtab <- kable(modalidades2[c("Modalidades",
+#                          "Num")],
+#             format = "latex",
+#             align = c("|l","r|"), 
+#             col.names = c("RA Atingida",
+#                           "Número"), 
+#             digits = 2, 
+#             caption = "Número de projetos por Regiões Administrativas atingidas")
+# xtab <- kableExtra::kable_styling(xtab,
+#                                   font_size = 7,
+#                                   position="center",
+#                                   latex_options = "hold_position")
+
+```
+No que diz respeito à quantidade de vezes em que os projetos atigiram alguma RA, temos o destaque para a RA `r maximo_var` vezes pelos projetos pagos, enquanto que temos uma situação de baixo desempenho, onde a RA `r minimo_var` vezes pelos projetos pagos.
+
+# Já contemplados
+
+
+```{r grafico_contagem_ja_concorreu, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_Ja_Concorreu +
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r ja_concorreu_contagem, echo=FALSE, include=FALSE}
+library(tidyverse)
+max <- ja_concorreu %>%
+  filter(Num>2) %>%
+  select(Ja_Concorreu,  Num)%>%
+  slice(which.max(Num))
+
+min <- ja_concorreu %>%
+  filter(Num>2) %>%
+  select(Ja_Concorreu,  Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste((max$Ja_Concorreu), ", que teve o maior resultado, com", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$Ja_Concorreu), " que teve o maior resultado, com", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+#Pega uma cópia do data frame de linguagem e muda os dados.
+# modalidades2 <- modalidades %>%
+#   mutate(Valor=sprintf("R$ %s", format(ValoresMedios,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+# xtab <- kable(modalidades2[c("Ja_Concorreu",
+#                          "Num")],
+#             format = "latex",
+#             align = c("|l","r|"), 
+#             col.names = c("RA Atingida",
+#                           "Número"), 
+#             digits = 2, 
+#             caption = "Número de projetos por Regiões Administrativas atingidas")
+# xtab <- kableExtra::kable_styling(xtab,
+#                                   font_size = 7,
+#                                   position="center",
+#                                   latex_options = "hold_position")
+
+```
+No que diz respeito à quantidade de vezes que os proponentes já concorreram a recursos do FAC anteriomente, temos como resultado `r maximo_var` proponentes, enquanto que temos uma situação de baixo desempenho, com o resultado `r minimo_var` proponentes.
+
+
+
+```{r grafico_contagem_ja_contemplado, include=TRUE,echo=FALSE, fig.width=8, fig.height=6, out.width="15cm", out.height="15cm"}
+library(ggplot2)
+
+
+grafico_Contagem_Ja_Contemplado+
+  ggthemes::theme_hc()+
+  guia(4)+
+  ggplot2::theme(legend.position = "none", 
+                 axis.title.x = element_blank(), 
+                 axis.title.y=element_blank())+
+  ggplot2::theme(axis.text.x = element_text(size=7), 
+                 axis.text.y = element_text(size=7))+
+  ggplot2::theme(plot.margin = margin(t=margens["cima"], 
+                                      r=margens["direita"], 
+                                      b=margens["baixo"], 
+                                      l=margens["esquerda"], 
+                                      unit="pt"))
+```
+```{r ja_contemplado_contagem, echo=FALSE, include=FALSE}
+max <- ja_contemplado %>%
+  filter(Num>2) %>%
+  select(Ja_Contemplado,  Num)%>%
+  slice(which.max(Num))
+
+min <- ja_contemplado %>%
+  filter(Num>2) %>%
+  select(Ja_Contemplado,  Num)%>%
+  slice(which.min(Num))
+
+
+maximo_var<-paste((max$Ja_Contemplado), ", que teve o maior resultado, com", 
+              sprintf("%s", format(max$Num, big.mark = ".", decimal.mark = ",")))
+minimo_var<-paste((min$Ja_Contemplado), " que teve o maior resultado, com", 
+              sprintf("%s", format(min$Num, big.mark = ".", decimal.mark = ",")))
+
+#Pega uma cópia do data frame de linguagem e muda os dados.
+# modalidades2 <- modalidades %>%
+#   mutate(Valor=sprintf("R$ %s", format(ValoresMedios,big.mark = ".", decimal.mark = ",", digits = 2)))
+
+# xtab <- kable(modalidades2[c("Ja_Contemplado",
+#                          "Num")],
+#             format = "latex",
+#             align = c("|l","r|"), 
+#             col.names = c("RA Atingida",
+#                           "Número"), 
+#             digits = 2, 
+#             caption = "Número de projetos por Regiões Administrativas atingidas")
+# xtab <- kableExtra::kable_styling(xtab,
+#                                   font_size = 7,
+#                                   position="center",
+#                                   latex_options = "hold_position")
+
+```
+No que diz respeito à quantidade de vezes que os proponentes já receberam recursos do FAC anteriomente, temos como resultado `r maximo_var` proponentes, enquanto que temos uma situação de baixo desempenho, com o resultado `r minimo_var` proponentes.
+
+
+
+

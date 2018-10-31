@@ -189,3 +189,6 @@ dados<-ls()
 # Salvar imagem -------------------
 save(list = dados, file="dados_finais_salvos.RData",compress = T)
 
+write.table(names(FAC2015_val), 
+            file ="nomes.csv",
+            sep = ";")
